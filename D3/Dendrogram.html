@@ -26,7 +26,7 @@
 </head>
 
 <body>
-	<script src="../lib/d3.v3.min.js"></script>
+	<script src="lib/d3.v3.min.js"></script>
 	<script>
 
 		var padding = 50,
@@ -49,7 +49,7 @@
 		.append("g")
 		.attr("transform", "translate(" + 7*padding + "," + padding + ")");
 
-		d3.json("sushi.json", function(error, sushi) {
+		d3.json("data/sushi.json", function(error, sushi) {
 			if (error) throw error;
 
 			root = sushi;
