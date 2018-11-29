@@ -8,7 +8,6 @@ import tweepy
 
 # must use Python 2.7.x
 
-# 1 point
 def loadKeys(key_file):
     # NOTE: put  keys and tokens in the keys.json file,
     #       then implement this method for loading access keys and token from keys.json
@@ -19,7 +18,6 @@ def loadKeys(key_file):
         keys=json.load(key)
     return keys['api_key'], keys['api_secret'], keys['token'], keys['token_secret']
 
-# 4 points
 def getPrimaryFriends(api, root_user, no_of_friends):
     # NOTE: implement the method for fetching 'no_of_friends' primary friends of 'root_user'
     # rtype: list containing entries in the form of a tuple (root_user, friend)
@@ -43,8 +41,6 @@ def getPrimaryFriends(api, root_user, no_of_friends):
 
     return primary_friends
 
-
-# 4 points
 def getNextLevelFriends(api, users_list, no_of_friends):
     # NOTE: implement the method for fetching 'no_of_friends' friends for each user in users_list
     # rtype: list containing entries in the form of a tuple (user, friend)
@@ -71,7 +67,6 @@ def getNextLevelFriends(api, users_list, no_of_friends):
 
     return next_level_friends
 
-# 4 points
 def getNextLevelFollowers(api, users_list, no_of_followers):
     # NOTE: implement the method for fetching 'no_of_followers' followers for each user in users_list
     # rtype: list containing entries in the form of a tuple (follower, user)
@@ -99,7 +94,6 @@ def getNextLevelFollowers(api, users_list, no_of_followers):
 
     return next_level_followers
 
-# 3 points
 def GatherAllEdges(api, root_user, no_of_neighbours):
     # NOTE:  implement this method for calling the methods getPrimaryFriends, getNextLevelFriends
     #        and getNextLevelFollowers. Use no_of_neighbours to specify the no_of_friends/no_of_followers parameter.
@@ -123,7 +117,6 @@ def GatherAllEdges(api, root_user, no_of_neighbours):
     return all_edges
 
 
-# 2 points
 def writeToFile(data, output_file):
     # write data to output_file
     # rtype: None
