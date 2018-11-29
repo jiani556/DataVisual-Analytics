@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="lib/d3.v3.min.js"></script>
+  <!-- load the d3.js library -->
+  <style type="text/css">
+    .axis path {
+      fill: none;
+      stroke: black;
+    }
+
+    .axis line {
+      fill: none;
+      stroke: black;
+    }
+
+  </style>
+</head>
+
+<body>
+  <script>
+  // Set the dimensions of the canvas / graph
+    var w = 800;
+    var h = 600;
+    var padding = 60;
+
+//////////////figure 1//////////////
+    var svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+
+// gain data
+    d3.csv("wine_quality.csv", function(error, dataset) {
+
+      console.log(dataset)
+
+      var bad_data = dataset.filter(function(d) {
+        return d.quality < 6;
+      })
+      console.log(bad_data);
+      var good_data = dataset.filter(function(d) {
+        return d.quality >= 6;
+      })
+      console.log(good_data);
+
+// add Scale; Set the ranges
+      var xScale = d3.scale.linear()
+        .domain([0, d3.max(dataset, function(d) {
+          return +d.alcohol;
+        })])
+        .range([padding, w - padding]);
+
+      var yScale = d3.scale.linear()
+        .domain([0, d3.max(dataset, function(d) {
+          // console.log(+d.pH)
+          return +d.pH;
+        })])
+        .range([h - padding, padding]);
+
+// Define the axes
+      var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+      var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+      svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (h - padding) + ")")
+        .call(xAxis);
+      svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + padding + ",0)")
+        .call(yAxis);
+
+// add nodes
+      svg.selectAll("path")
+        .data(good_data)
+        .enter()
+        .append("path")
+        .attr("d", d3.svg.symbol().size(30).type("cross"))
+        .attr("transform", function(d) {
+          return "translate(" + xScale(+d.alcohol) + ", " + yScale(+d.pH) + ")";
+        })
+        .attr("fill","none")
+        .attr("stroke", "blue");
+
+      svg.selectAll("circle")
+        .data(bad_data)
+        .enter()
+        .append("path")
+        .attr("d", d3.svg.symbol().size(30).type("circle"))
+        .attr("transform", function(d) {
+          return "translate(" + xScale(+d.alcohol) + ", " + yScale(+d.pH) + ")";
+        })
+        .attr("fill", "none")
+        .attr("stroke", "red");
+
+// add label
+      svg.append("text")
+        .attr("x", 375)
+        .attr("y", 580)
+        .attr("font-size", "20px")
+        .text("Alcohol");
+
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", "-15em")
+          .attr("y","1em")
+          .attr("font-size", "20px")
+          .text("pH");
+
+// add title
+      svg.append("text")
+          .attr("x", 10 )
+          .attr("y", 20)
+          .style("text-anchor", "start")
+          .style("font-size","20px")
+          .text("pH vs. Alcohol");
+
+// add legend
+svg.append("path")
+   .attr("d", d3.svg.symbol().size(60).type("circle"))
+   .attr("transform",
+    "translate(" + 740 + ", " + 30 + ")")
+   .attr("fill", "none")
+   .attr("stroke", "red");
+
+svg.append("path")
+  .attr("d", d3.svg.symbol().size(60).type("cross"))
+  .attr("transform",
+   "translate(" + 740 + ", " +10 + ")")
+  .attr("fill", "none")
+  .attr("stroke", "blue");
+
+ svg.append("text")
+ .attr("transform",
+  "translate(" + 750 + ", " +10 + ")")
+  .attr("dy", ".30em")
+  .attr("font-size","15px")
+  .text("Good");
+
+  svg.append("text")
+  .attr("transform",
+   "translate(" + 750 + ", " +30 + ")")
+   .attr("dy", ".30em")
+   .attr("font-size","15px")
+   .text("Bad");
+
+
+//////////////figure 2//////////////
+      var svg2 = d3.select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+      var xScale = d3.scale.linear()
+        .domain([0, d3.max(dataset, function(d) {
+          return +d.residual_sugar ;
+        })])
+        .range([padding, w - padding]);
+
+      var yScale = d3.scale.linear()
+        .domain([0, d3.max(dataset, function(d) {
+          return +d.pH;
+        })])
+        .range([h - padding, padding]);
+
+// Define the axes
+      var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+      var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+      svg2.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (h - padding) + ")")
+        .call(xAxis);
+      svg2.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + padding + ",0)")
+        .call(yAxis);
+
+// add nodes
+      svg2.selectAll("path")
+        .data(good_data)
+        .enter()
+        .append("path")
+        .attr("d", d3.svg.symbol().size(30).type("cross"))
+        .attr("transform", function(d) {
+          return "translate(" + xScale(+d.residual_sugar) + ", " + yScale(+d.pH) + ")";
+        })
+        .attr("fill", "none")
+        .attr("stroke", "blue");
+
+      svg2.selectAll("circle")
+        .data(bad_data)
+        .enter()
+        .append("path")
+        .attr("d", d3.svg.symbol().size(30).type("circle"))
+        .attr("transform", function(d) {
+          return "translate(" + xScale(+d.residual_sugar) + ", " + yScale(+d.pH) + ")";
+        })
+        .attr("fill", "none")
+        .attr("stroke", "red");
+
+// add label
+      svg2.append("text")
+        .attr("x", 375)
+        .attr("y", 580)
+        .attr("font-size", "20px")
+        .text("residual_sugar");
+
+
+        svg2.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", "-15em")
+          .attr("y","1em")
+          .attr("font-size", "20px")
+          .text("pH");
+// add title
+      svg2.append("text")
+          .attr("x", 10 )
+          .attr("y", 20)
+          .style("text-anchor", "start")
+          .style("font-size","20px")
+          .text("pH vs. Residual Sugar");
+
+// add legend
+       svg2.append("path")
+          .attr("d", d3.svg.symbol().size(60).type("circle"))
+          .attr("transform",
+           "translate(" + 740 + ", " + 30 + ")")
+          .attr("fill", "none")
+          .attr("stroke", "red");
+
+      svg2.append("path")
+         .attr("d", d3.svg.symbol().size(60).type("cross"))
+         .attr("transform",
+          "translate(" + 740 + ", " +10 + ")")
+         .attr("fill", "none")
+         .attr("stroke", "blue");
+
+        svg2.append("text")
+        .attr("transform",
+         "translate(" + 750 + ", " +10 + ")")
+         .attr("dy", ".30em")
+         .attr("font-size","15px")
+         .text("Good");
+
+         svg2.append("text")
+         .attr("transform",
+          "translate(" + 750 + ", " +30 + ")")
+          .attr("dy", ".30em")
+          .attr("font-size","15px")
+          .text("Bad");
+
+//////////////figure 3//////////////
+var svg3 = d3.select("body")
+  .append("svg")
+  .attr("width", w)
+  .attr("height", h);
+  var xScale = d3.scale.linear()
+    .domain([0, d3.max(dataset, function(d) {
+      return +d.alcohol;
+    })])
+    .range([padding, w - padding]);
+
+  var yScale = d3.scale.linear()
+    .domain([0, d3.max(dataset, function(d) {
+      // console.log(+d.pH)
+      return +d.pH;
+    })])
+    .range([h - padding, padding]);
+
+// Define the axes
+  var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom");
+  var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient("left");
+  svg3.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + (h - padding) + ")")
+    .call(xAxis);
+  svg3.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(" + padding + ",0)")
+    .call(yAxis);
+
+// add nodes
+  svg3.selectAll("path")
+    .data(good_data)
+    .enter()
+    .append("path")
+    .attr("d", d3.svg.symbol().size(function(d) {
+      return 20/(+d.alcohol/d3.max(dataset, function(d) {
+        return +d.alcohol;}) * +d.pH/d3.max(dataset, function(d) {
+        return +d.pH;}))}).type("cross"))
+    .attr("transform", function(d) {
+      return "translate(" + xScale(+d.alcohol) +
+       ", " + yScale(+d.pH) + ")";
+    })
+    .attr("fill", "none")
+    .attr("stroke", "blue");
+
+  svg3.selectAll("circle")
+    .data(bad_data)
+    .enter()
+    .append("path")
+    .attr("d", d3.svg.symbol().size(function(d) {
+      return 20/(+d.alcohol/d3.max(dataset, function(d) {
+        return +d.alcohol;}) * +d.pH/d3.max(dataset, function(d) {
+        return +d.pH;}))}).type("circle"))
+    .attr("transform", function(d) {
+      return "translate(" + xScale(+d.alcohol)
+      + ", " + yScale(+d.pH) + ")";
+    })
+    .attr("fill", "none")
+    .attr("stroke", "red");
+
+// add label
+  svg3.append("text")
+    .attr("x", 375)
+    .attr("y", 580)
+    .attr("font-size", "20px")
+    .text("Alcohol");
+
+
+  svg3.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", "-15em")
+    .attr("y","1em")
+    .attr("font-size", "20px")
+    .text("pH");
+
+// add title
+  svg3.append("text")
+      .attr("x", 10 )
+      .attr("y", 20)
+      .style("text-anchor", "start")
+      .style("font-size","20px")
+      .text("Alcohol vs pH (scaled symbols)");
+
+// add legend
+svg3.append("path")
+.attr("d", d3.svg.symbol().size(60).type("circle"))
+.attr("transform",
+"translate(" + 740 + ", " + 30 + ")")
+.attr("fill", "none")
+.attr("stroke", "red");
+
+svg3.append("path")
+.attr("d", d3.svg.symbol().size(60).type("cross"))
+.attr("transform",
+"translate(" + 740 + ", " +10 + ")")
+.attr("fill", "none")
+.attr("stroke", "blue");
+
+svg3.append("text")
+.attr("transform",
+"translate(" + 750 + ", " +10 + ")")
+.attr("dy", ".30em")
+.attr("font-size","15px")
+.text("Good");
+
+svg3.append("text")
+.attr("transform",
+"translate(" + 750 + ", " +30 + ")")
+.attr("dy", ".30em")
+.attr("font-size","15px")
+.text("Bad");
+
+//////////////figure 4//////////////
+
+var svg4 = d3.select("body")
+  .append("svg")
+  .attr("width", w)
+  .attr("height", h);
+
+  var xScale = d3.scale.linear()
+    .domain([0, d3.max(dataset, function(d) {
+      return +d.pH;
+    })])
+    .range([padding, w - padding]);
+
+  var yScale = d3.scale.sqrt().domain([0, d3.max(dataset, function(d) {
+      // console.log(+d.pH)
+      return +d.sulphates;
+    })])
+    .range([h - padding, padding]);
+
+// Define the axes
+  var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom");
+  var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient("left");
+  svg4.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + (h - padding) + ")")
+    .call(xAxis);
+  svg4.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(" + padding + ",0)")
+    .call(yAxis);
+
+// add nodes
+  svg4.selectAll("path")
+    .data(good_data)
+    .enter()
+    .append("path")
+    .attr("d", d3.svg.symbol().size(30).type("cross"))
+    .attr("transform", function(d) {
+      return "translate(" + xScale(+d.pH) +
+       ", " + yScale(+d.sulphates) + ")";
+    })
+    .attr("fill", "none")
+    .attr("stroke", "blue");
+
+  svg4.selectAll("circle")
+    .data(bad_data)
+    .enter()
+    .append("path")
+    .attr("d", d3.svg.symbol().size(30).type("circle"))
+    .attr("transform", function(d) {
+      return "translate(" + xScale(+d.pH) +
+       ", " + yScale(+d.sulphates) + ")";
+    })
+    .attr("fill", "none")
+    .attr("stroke", "red");
+
+// add label
+  svg4.append("text")
+    .attr("x", 375)
+    .attr("y", 580)
+    .attr("font-size", "20px")
+    .text("pH");
+
+
+  svg4.append("text")
+    .attr("font-size", "20px")
+    .attr("transform", "rotate(-90)")
+    .attr("x", "-15em")
+    .attr("y","1em")
+    .text("Sulphates");
+// add title
+  svg4.append("text")
+      .attr("x", 10 )
+      .attr("y", 20)
+      .style("text-anchor", "start")
+      .style("font-size","20px")
+      .text("Sulphates vs. pH (square-root-scaled)");
+
+// add legend
+svg4.append("path")
+   .attr("d", d3.svg.symbol().size(60).type("circle"))
+   .attr("transform",
+    "translate(" + 740 + ", " + 30 + ")")
+   .attr("fill", "none")
+   .attr("stroke", "red");
+
+svg4.append("path")
+  .attr("d", d3.svg.symbol().size(60).type("cross"))
+  .attr("transform",
+   "translate(" + 740 + ", " +10 + ")")
+  .attr("fill", "none")
+  .attr("stroke", "blue");
+
+ svg4.append("text")
+ .attr("transform",
+  "translate(" + 750 + ", " +10 + ")")
+  .attr("dy", ".30em")
+  .attr("font-size","15px")
+  .text("Good");
+
+  svg4.append("text")
+  .attr("transform",
+   "translate(" + 750 + ", " +30 + ")")
+   .attr("dy", ".30em")
+   .attr("font-size","15px")
+   .text("Bad");
+
+//////////////figure 5//////////////
+var svg5 = d3.select("body")
+  .append("svg")
+  .attr("width", w)
+  .attr("height", h);
+  var xScale = d3.scale.linear()
+    .domain([0, d3.max(dataset, function(d) {
+      return +d.pH;
+    })])
+    .range([padding, w - padding]);
+
+  var yScale = d3.scale.log()
+                .base(Math.E)
+                .domain([Math.exp(-2), Math.exp(d3.max(dataset, function(d) {
+      return +d.sulphates;}))])
+                .range([h - padding, padding]);
+
+// Define the axes
+  var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom");
+  var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient("left");
+  svg5.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + (h - padding) + ")")
+    .call(xAxis);
+  svg5.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(" + padding + ",0)")
+    .call(yAxis);
+
+// add nodes
+  svg5.selectAll("path")
+    .data(good_data)
+    .enter()
+    .append("path")
+    .attr("d", d3.svg.symbol().size(30).type("cross"))
+    .attr("transform", function(d) {
+      return "translate(" + xScale(+d.pH) +
+       ", " + yScale(+d.sulphates) + ")";
+    })
+    .attr("fill", "none")
+    .attr("stroke", "blue");
+
+  svg5.selectAll("circle")
+    .data(bad_data)
+    .enter()
+    .append("path")
+    .attr("d", d3.svg.symbol().size(30).type("circle"))
+    .attr("transform", function(d) {
+      return "translate(" + xScale(+d.pH)
+      + ", " + yScale(+d.sulphates) + ")";
+    })
+    .attr("fill", "none")
+    .attr("stroke", "red");
+
+// add label
+svg5.append("text")
+  .attr("x", 375)
+  .attr("y", 580)
+  .attr("font-size", "20px")
+  .text("pH");
+
+
+svg5.append("text")
+  .attr("font-size", "20px")
+  .attr("transform", "rotate(-90)")
+  .attr("x", "-15em")
+  .attr("y","1em")
+  .text("Sulphates");
+// add title
+svg5.append("text")
+    .attr("x", 10)
+    .attr("y", 20)
+    .style("text-anchor", "start")
+    .style("font-size","20px")
+    .text("Sulphates vs. pH (log-scaled)");
+
+// add legend
+svg5.append("path")
+   .attr("d", d3.svg.symbol().size(60).type("circle"))
+   .attr("transform",
+    "translate(" + 740 + ", " + 30 + ")")
+   .attr("fill", "none")
+   .attr("stroke", "red");
+
+svg5.append("path")
+  .attr("d", d3.svg.symbol().size(60).type("cross"))
+  .attr("transform",
+   "translate(" + 740 + ", " +10 + ")")
+  .attr("fill", "none")
+  .attr("stroke", "blue");
+
+ svg5.append("text")
+ .attr("transform",
+  "translate(" + 750 + ", " +10 + ")")
+  .attr("dy", ".30em")
+  .attr("font-size","15px")
+  .text("Good");
+
+  svg5.append("text")
+  .attr("transform",
+   "translate(" + 750 + ", " +30 + ")")
+   .attr("dy", ".30em")
+   .attr("font-size","15px")
+   .text("Bad");
+
+
+
+    });
+
+
+  </script>
+</body>
+
+</html>
