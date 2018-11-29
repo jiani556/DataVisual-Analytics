@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
     <!-- load the d3.js library -->
-  <script type="text/javascript" src="../lib/d3.v3.min.js"></script>
+  <script type="text/javascript" src="lib/d3.v3.min.js"></script>
   <style type="text/css">
     .axis path {
       fill: none;
@@ -29,7 +29,7 @@
     var w = 800,h = 700,padding = 100,cell_size = 70;
 
     // gain data
-    d3.csv("heatmap.csv", function(error, dataset) {
+    d3.csv("data/heatmap.csv", function(error, dataset) {
       var all_cell = [];
       for (var i = 0; i < dataset.length; i = i + 1) {
         for (name in dataset[i]) {
