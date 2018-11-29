@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.chart text {
+  fill: black;
+  font: 10px sans-serif;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+</style>
+<svg class="chart"></svg>
+<script src="../lib/d3.v3.min.js" charset="utf-8"></script>
+<script>
+
+var width = 700,
+    barHeight = 70,
+    height = 600,
+    padding = 20;
+
+// gain data
+
+var dataset=[{franchise:'Harry Potter', revenue: {1:974, 2:878, 3:796, 4:896, 5:942, 6:935, 7:960, 8:1341 }},
+{franchise:'Transformers', revenue: {1:708, 2:836, 3:1123, 4:1104, 5:603 }},
+{franchise:'Mission Impossible', revenue: {1:457, 2:549, 3:397, 4:694, 5:700 }},
+{franchise:'Fast and the Furious', revenue: {1:206, 2:236, 3:363, 4:363, 5:629, 6:789, 7:1516, 8:1237 }},
+{franchise:'Hunger Games', revenue: {1:677, 2:864, 3:766, 4:650 }},
+{franchise:'Pirates of the Caribbean', revenue: {1:634, 2:1066, 3:963, 4:1045, 5:794 }}]
+
+var movie=[]
+for (var i = 0; i < dataset.length; i = i + 1) {
+    movie.push(dataset[i].franchise)
+}
+
+var sum = function(dataset){
+  var sum_value = 0;
+  for (num in dataset.revenue) {
+      sum_value += parseFloat( dataset.revenue[num] );
+  }
+  return sum_value
+};
+
+var x = d3.scale.linear()
+    .range([0, width-10*padding])
+    .domain([0, d3.max(dataset, function(d) {
+      return sum(d); })]);
+
+var y = d3.scale.ordinal()
+    .domain(movie)
+    .rangeBands([0, barHeight * dataset.length]);
+
+// y axis
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+// draw chat
+var chart = d3.select(".chart")
+    .attr("width", width + 3*padding)
+    .attr("height", barHeight * dataset.length);
+
+var bar = chart.selectAll("g")
+    .data(dataset)
+    .enter().append("g")
+    .attr("fill", "blue")
+    .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+bar.append("rect")
+    .attr("transform", "translate(" + 170 + ", 0)")
+    .attr("width", function(d) {return x(sum(d)); })
+    .attr("height", barHeight - padding)
+
+bar.append("text")
+    .attr("x", 170+padding)
+    .attr("y", barHeight*2/5)
+    .attr("dy", ".35em")
+    .style("fill","white")
+    .style("font-size", "13px")
+    .text(function(d) { return "$" + sum(d); });
+
+bar.append("text")
+    .attr("x",padding)
+    .attr("y", barHeight*2/5)
+    .attr("dy", ".35em")
+    .style("font-size", "13px")
+    .text(function(d) {
+      return d.franchise;
+    });
+
+    bar.on("mouseover",function(d) {
+      d3.select(this).attr("fill","grey");
+      d3.selectAll('.svgLine').remove();
+    // gain num of each installment
+      var each_ins = function(dataset) {
+        var num = Object.keys(dataset.revenue);
+        var Num_array = [];
+        for (var i = 0; i < num.length; i++) {
+          Num_array.push(parseFloat(num[i].slice(-4)))
+        }
+        return Num_array
+
+      }
+    var width = 250
+    var height = 200
+    var padding= 20
+
+    //scale
+    var x = d3.scale.ordinal()
+              .domain(each_ins(d))
+              .rangePoints([padding, width-padding])
+
+    var y = d3.scale.linear()
+              .domain([0,d3.max(Object.values(d.revenue))])
+              .range([height-padding, padding])
+
+    //axis
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+    // draw
+      var line = d3.svg.line()
+          .x(function(d) { return x(d[0]); })
+          .y(function(d) { return y(d[1]); });
+
+      var svg = d3.select("body")
+          .append("svg")
+          .style("position","absolute")
+          .style("right",5)
+          .style("top",0)
+          .attr("class", "svgLine")
+          .attr("width", width + padding)
+          .attr("height", height + padding * 2)
+          .append("g")
+          .attr("transform",
+                "translate(" + padding + "," + padding + ")");
+
+      var datapu = []
+      for (var i = 0; i <  each_ins(d).length; i++) {
+        datapu.push([each_ins(d)[i], Object.values(d.revenue)[i]])
+      }
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + 4*padding + ", 0)")
+        .call(yAxis);
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(" + 3*padding + "," + (height-padding) + ")")
+        .call(xAxis);
+
+      svg.append("path")
+         .datum(datapu)
+         .attr("class", "line")
+         .attr("transform", "translate(" + 3*padding + ", 0)")
+         .attr("d", line);
+
+    // add label
+    svg.append("text")
+      .attr("x", 0)
+      .attr("y", height/2)
+      .attr("font-size", "12px")
+      .style("font-family","sans-serif")
+      .text("revenue");
+
+    svg.append("text")
+      .attr("x", width/2+2*padding)
+      .attr("y", 215)
+      .attr("font-size", "12px")
+      .style("font-family","sans-serif")
+      .text("movie");
+    })
+
+    .on("mouseout", function(d){
+      // d3.select(this);
+      d3.select(this).attr("fill","blue");
+      d3.selectAll(".svgLine").remove();
+    })
+
+    </script>
