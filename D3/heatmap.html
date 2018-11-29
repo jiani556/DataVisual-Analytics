@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+    <!-- load the d3.js library -->
+  <script type="text/javascript" src="../lib/d3.v3.min.js"></script>
+  <style type="text/css">
+    .axis path {
+      fill: none;
+      stroke: none;
+    }
+
+    .axis line {
+      fill: none;
+      stroke: none；
+    }
+
+    .axis text {
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+  // Set the dimensions of the canvas / graph
+    var w = 800,h = 700,padding = 100,cell_size = 70;
+
+    // gain data
+    d3.csv("heatmap.csv", function(error, dataset) {
+      var all_cell = [];
+      for (var i = 0; i < dataset.length; i = i + 1) {
+        for (name in dataset[i]) {
+          if (name != "episode" && name != "season") {
+            var cell =[name, dataset[i][name], dataset[i]["episode"], dataset[i]["season"]]
+            all_cell.push(cell)
+          }
+        }
+      }
+
+      // drop down select box
+    var opt = ["season1", "season2", "season3", "season4", "season5", "season6"];
+    var select = d3.select('body')
+      .append('select')
+      .attr('class', 'select')
+      .on('change', onchange)
+    var options = select
+      .selectAll('option')
+      .data(opt).enter()
+      .append('option')
+      .text(function(d) {
+        return d;
+      });
+
+      var s1=[],s2=[],s3=[],s4=[],s5=[],s6=[];
+      all_cell.forEach(function(a) {
+        if (a[3] == "1") {
+          s1.push(a)
+        }
+        else if (a[3] == "2") {
+          s2.push(a)
+        }
+        else if (a[3] == "3") {
+          s3.push(a)
+        }
+        else if (a[3] == "4") {
+          s4.push(a)
+        }
+        else if (a[3] == "5") {
+          s5.push(a)
+        }
+        else if (a[3] == "6") {
+          s6.push(a)
+        }
+      });
+
+
+        // set Scale
+      var cell_num = Object.keys(dataset[0]).length - 2;
+
+      var x = d3.scale.linear()
+        .domain([1, 10])
+        .range([padding, w - padding]);
+
+      var y = d3.scale.ordinal()
+        .domain(["Baratheon", "Greyjoy", "Lannister","Stark", "Targaryen", "Tyrell"])
+        .rangePoints([cell_num * cell_size, padding]);
+
+
+      var element2=[];
+      for (var i = 0; i < s1.length; i = i + 1) {
+        // console.log(s1[i][1]);
+        element2.push(s1[i][1])
+      }
+
+      var color = d3.scale.quantile()
+        .domain([Math.min(...element2),Math.max(...element2)])
+        .range(['#ffffd9','#edf8b1','#c7e9b4','#7fcdbb','#41b6c4','#1d91c0','#225ea8','#253494','#081d58']);
+
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .append("g");
+
+      // creat axis
+      var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+      var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+
+      svg.append("g").attr("class", "axis")
+         .attr("transform", "translate(" + cell_size/2 + ", " + ((cell_num+1) * cell_size ) + ")")
+         .call(xAxis)
+      svg.append("g").attr("class", "axis")
+        .attr("transform", "translate(" + padding  + ", " + cell_size/2 + ")")
+        .call(yAxis)
+
+       svg.selectAll(".s1")
+          .data(s1)
+          .enter().append("rect")
+          .attr("class", "s1")
+          .attr("x", function(d) {
+            return x(d[2]);
+          })
+          .attr("y", function(d, i) {
+            return y(d[0]);
+          })
+          .attr("width", cell_size)
+          .attr("height", cell_size)
+          .style("stroke","white")
+          .style("stroke-width",3)
+          .style("fill", function(d) {
+            return color(d[1]);
+          });
+
+      var float = color.quantiles()
+      var inter = [];
+      float.forEach(function(element) {
+        inter.push(d3.round(element));
+      });
+      inter.unshift(0)
+
+      var legend = svg.selectAll(".legend")
+        .data(inter)
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("y", "h-pedding")
+        .attr("transform", function(d, i) {
+          return "translate(" + (w/2-200+50 * i) + ",600)";
+        });
+
+      legend.append("rect")
+        .attr("width", 50)
+        .attr("height", 30)
+        .style("stroke","black")
+        .style("fill", color);
+
+      legend.append("text")
+        .attr("x", 0)
+        .attr("y", 40)
+        .attr("dy", ".30em")
+        .style("font-family","sans-serif")
+        .text(String);
+
+        svg.append("text")
+          .attr("x", w/2-200)
+          .attr("y", 580)
+          .attr("dy", ".30em")
+          .style("font-family","sans-serif")
+          .style("font-weight","bold")
+          .text("Number of appearances");
+
+      // add label
+      svg.append("text")
+        .attr("x", w / 2)
+        .attr("y", padding+10+cell_size*6)
+        .attr("dy", ".30em")
+        .style("font-family","sans-serif")
+        .style("font-weight","bold")
+        .text("Episode");
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .style("font-family","sans-serif")
+        .attr("x", "-19em")
+        .attr("y","0.7em")
+        .attr("font-size", "16spx")
+        .style("font-weight","bold")
+        .text("House");
+
+      svg.append("text")
+        .attr("x", w / 2+30)
+        .attr("y", padding/2)
+        .attr("dy", ".35em")
+        .style("font-size", "20px")
+        .style("font-weight","bold")
+        .style("text-anchor", "middle")
+        .style("font-family","sans-serif")
+        .text("Game Of Thrones House-Wise Appearances");
+
+      // add onchange
+
+      function onchange() {
+        var dataset = {
+          "season1": s1,
+          "season2": s2,
+          "season3": s3,
+          "season4": s4,
+          "season5": s5,
+          "season6": s6,
+        }
+
+        var box = d3.select('select').property('value')
+        var data = dataset[box]
+        d3.selectAll('svg').remove();
+
+        var x = d3.scale.linear()
+          .domain([1, 10])
+          .range([padding, w - padding]);
+
+        var y = d3.scale.ordinal()
+          .domain(["Baratheon", "Greyjoy", "Lannister","Stark", "Targaryen", "Tyrell"])
+          .rangePoints([cell_num * cell_size, padding]);
+
+          var element2=[];
+          for (var i = 0; i < data.length; i = i + 1) {
+            console.log(data[i][1]);
+            element2.push(data[i][1])
+          }
+
+        var color = d3.scale.quantile()
+          .domain([Math.min(...element2),Math.max(...element2)])
+          .range(['#ffffd9','#edf8b1','#c7e9b4','#7fcdbb','#41b6c4','#1d91c0','#225ea8','#253494','#081d58']);
+
+
+        var svg = d3.select("body").append("svg")
+          .attr("width", w)
+          .attr("height", h)
+          .append("g");
+
+        // creat axis
+        var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom")
+        var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left")
+
+        svg.append("g").attr("class", "axis")
+           .attr("transform", "translate(" + cell_size/2 + ", " + ((cell_num+1) * cell_size ) + ")")
+           .call(xAxis)
+        svg.append("g").attr("class", "axis")
+          .attr("transform", "translate(" + padding  + ", " + cell_size/2 + ")")
+          .call(yAxis)
+
+         svg.selectAll(".data")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "data")
+            .attr("x", function(d) {
+              return x(d[2]);
+            })
+            .attr("y", function(d, i) {
+              return y(d[0]);
+            })
+            .attr("width", cell_size)
+            .attr("height", cell_size)
+            .style("stroke","white")
+            .style("stroke-width",3)
+            .style("fill", function(d) {
+              return color(d[1]);
+            });
+
+        var float = color.quantiles()
+        var inter = [];
+        float.forEach(function(element) {
+          inter.push(d3.round(element));
+        });
+        inter.unshift(0)
+
+        var legend = svg.selectAll(".legend")
+          .data(inter)
+          .enter().append("g")
+          .attr("class", "legend")
+          .attr("y", "h-pedding")
+          .attr("transform", function(d, i) {
+            return "translate(" + (w/2-200+50 * i) + ",600)";
+          });
+
+        legend.append("rect")
+          .attr("width", 50)
+          .attr("height", 30)
+          .style("stroke","black")
+          .style("fill", color);
+
+        legend.append("text")
+          .attr("x", 0)
+          .attr("y", 40)
+          .attr("dy", ".30em")
+          .style("font-family","sans-serif")
+          .text(String);
+
+          svg.append("text")
+            .attr("x", w/2-200)
+            .attr("y", 580)
+            .attr("dy", ".30em")
+            .style("font-family","sans-serif")
+            .style("font-weight","bold")
+            .text("Number of appearances");
+
+        // add label
+        svg.append("text")
+          .attr("x", w / 2)
+          .attr("y", padding+10+cell_size*6)
+          .attr("dy", ".30em")
+          .style("font-family","sans-serif")
+          .style("font-weight","bold")
+          .text("Episode");
+
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .style("font-family","sans-serif")
+          .attr("x", "-19em")
+          .attr("y","0.7em")
+          .attr("font-size", "16spx")
+          .style("font-weight","bold")
+          .text("House");
+
+        svg.append("text")
+          .attr("x", w / 2+30)
+          .attr("y", padding/2)
+          .attr("dy", ".35em")
+          .style("font-size", "20px")
+          .style("font-weight","bold")
+          .style("text-anchor", "middle")
+          .style("font-family","sans-serif")
+          .text("Game Of Thrones House-Wise Appearances");
+      };
+
+    });
+  </script>
